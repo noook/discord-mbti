@@ -1,13 +1,17 @@
 import { User } from 'discord.js';
+import { Repository } from 'typeorm';
 import { DiscordUser } from '../entity';
 import { AppDataSource } from '../data-source';
+import { TranslatorLangs } from '../i18n';
 
 export class UserService {
+  private discordUserRepository: Repository<DiscordUser> = AppDataSource.manager.getRepository(DiscordUser);
+
   public async upsertUser(user: User): Promise<DiscordUser> {
     let discordUser: DiscordUser;
 
     try {
-      discordUser = await AppDataSource.getRepository(DiscordUser).findOneOrFail({
+      discordUser = await this.discordUserRepository.findOneOrFail({
         where: {
           discordId: user.id,
         },
@@ -22,5 +26,17 @@ export class UserService {
     }
 
     return discordUser;
+  }
+
+  public async setUserLocale(user: User, locale: TranslatorLangs): Promise<DiscordUser> {
+    const discordUser = await this.discordUserRepository.findOne({
+      where: {
+        discordId: user.id,
+      },
+    });
+
+    discordUser.locale = locale;
+
+    return AppDataSource.manager.save(discordUser);
   }
 }
