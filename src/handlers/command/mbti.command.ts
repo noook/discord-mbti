@@ -1,17 +1,17 @@
 import { CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
+import { BadInteractionException } from '../../exceptions/BadInteractionException';
 import { i18nFlags } from '../../i18n';
 import { UserService } from '../../services/user.service';
-import { logger } from '../../logger';
 import { CommandHandlerInterface } from './command.interface';
+import { MbtiService } from '../../services/mbti.service';
+import { logger } from '../../logger';
 
 export default class MbtiCommandHandler implements CommandHandlerInterface {
   public commandName = 'mbti';
 
-  private userService: UserService;
+  private userService: UserService = new UserService();
 
-  constructor() {
-    this.userService = new UserService();
-  }
+  private mbtiService: MbtiService = new MbtiService();
 
   async handle(interaction: CommandInteraction): Promise<void> {
     const { user } = interaction;
@@ -20,7 +20,10 @@ export default class MbtiCommandHandler implements CommandHandlerInterface {
     if (!discordUser.locale) {
       const locales = Object.entries(i18nFlags);
       const actions = new MessageActionRow().addComponents(
-        locales.map(([key, flag]) => new MessageButton().setCustomId(`setLocale=${key}`).setLabel(flag).setStyle('SECONDARY')),
+        locales.map(([key, flag]) => new MessageButton()
+          .setCustomId(`setLocale=${key}`)
+          .setLabel(flag)
+          .setStyle('SECONDARY')),
       );
 
       return interaction.reply({
@@ -28,8 +31,13 @@ export default class MbtiCommandHandler implements CommandHandlerInterface {
         components: [actions],
       });
     }
-
-    logger.debug(discordUser);
-    return interaction.reply('ok');
+    try {
+      return await this.mbtiService.resumeTest(interaction, discordUser);
+    } catch (e) {
+      if (e instanceof BadInteractionException) {
+        logger.error(e.message, e.interaction.toJSON());
+      }
+      return undefined;
+    }
   }
 }

@@ -6,7 +6,7 @@ export interface ButtonHandlerInterface<T = unknown> {
 }
 
 interface CommandButtonHandlerConstructor {
-  new(): ButtonHandlerInterface
+  new(): ButtonHandlerInterface;
 }
 
 export function commandHandlerFactory(Ctor: CommandButtonHandlerConstructor) {

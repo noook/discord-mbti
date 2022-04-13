@@ -28,6 +28,13 @@ module.exports = {
         }],
       },
     },
+    {
+      files: ['src/migration/*.ts'],
+      rules: {
+        'max-len': 'off',
+        '@typescript-eslint/no-throw-literal': 'off',
+      },
+    },
   ],
   rules: {
     'import/prefer-default-export': 'off',
