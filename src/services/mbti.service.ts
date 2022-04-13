@@ -1,10 +1,15 @@
 import { ButtonInteraction, CommandInteraction, Interaction } from 'discord.js';
+import { shuffle } from '../helpers';
 import { AppDataSource } from '../data-source';
-import { DiscordUser, MbtiTest } from '../entity';
+import { DiscordUser, MbtiTest, MbtiAnswer } from '../entity';
 import { BadInteractionException } from '../exceptions/BadInteractionException';
 
 export class MbtiService {
+  static TestLength = 44;
+
   private mbtiTestRepository = AppDataSource.getRepository(MbtiTest);
+
+  private mbtiAnswerRepository = AppDataSource.getRepository(MbtiAnswer);
 
   public async resumeTest(interaction: Interaction, user: DiscordUser) {
     let test = await this.getCurrentTest(user);
@@ -29,11 +34,22 @@ export class MbtiService {
     });
   }
 
-  public createTest(user: DiscordUser): Promise<MbtiTest> {
-    return this.mbtiTestRepository.save({
+  public async createTest(user: DiscordUser): Promise<MbtiTest> {
+    const test = this.mbtiTestRepository.create({
       user,
       step: 1,
     });
+
+    const answersIds = shuffle([...Array(MbtiService.TestLength)].map((_, idx) => idx + 1));
+    const answers = this.mbtiAnswerRepository.create(answersIds.map((pairId, step) => ({
+      pairId, step: step + 1,
+    })));
+
+    test.answers = answers;
+
+    await this.mbtiTestRepository.save(test);
+
+    return test;
   }
 
   public askQuestion(interaction: CommandInteraction | ButtonInteraction, test: MbtiTest): Promise<void> {

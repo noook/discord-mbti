@@ -1,7 +1,8 @@
 import {
-  Column, Entity, ManyToOne, PrimaryColumn,
+  Column, Entity, ManyToOne, OneToMany, PrimaryColumn,
 } from 'typeorm';
 import { DiscordUser } from './DiscordUser';
+import { MbtiAnswer } from './MbtiAnswer';
 
 @Entity()
 export class MbtiTest {
@@ -50,4 +51,11 @@ export class MbtiTest {
 
   @Column({ nullable: true })
     completedAt?: Date;
+
+  @OneToMany(
+    () => MbtiAnswer,
+    (answer) => answer.test,
+    { cascade: ['insert'] },
+  )
+    answers: MbtiAnswer[];
 }
