@@ -1,7 +1,7 @@
 import { CommandInteraction, MessageActionRow, MessageButton } from 'discord.js';
-import { i18nFlags } from '../i18n';
-import { UserService } from '../services/user.service';
-import { logger } from '../logger';
+import { i18nFlags } from '../../i18n';
+import { UserService } from '../../services/user.service';
+import { logger } from '../../logger';
 import { CommandHandlerInterface } from './command.interface';
 
 export default class MbtiCommandHandler implements CommandHandlerInterface {

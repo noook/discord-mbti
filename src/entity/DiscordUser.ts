@@ -1,5 +1,5 @@
 import {
-  Entity, Column, OneToMany, PrimaryColumn,
+  Entity, Column, PrimaryColumn,
 } from 'typeorm';
 import { TranslatorLangs } from '../i18n';
 // import { MbtiTest } from './MbtiTest';

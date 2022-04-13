@@ -1,8 +1,8 @@
 import { User } from 'discord.js';
 import { Repository } from 'typeorm';
+import { TranslatorLangs } from '../i18n';
 import { DiscordUser } from '../entity';
 import { AppDataSource } from '../data-source';
-import { TranslatorLangs } from '../i18n';
 
 export class UserService {
   private discordUserRepository: Repository<DiscordUser> = AppDataSource.manager.getRepository(DiscordUser);

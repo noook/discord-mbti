@@ -1,8 +1,6 @@
 import { Client, ClientOptions } from 'discord.js';
-import { UserService } from './services/user.service';
 import { logger } from './logger';
-import { commandHandlers } from './handlers';
-import { TranslatorLangs } from './i18n';
+import { commandButtonHandlers, commandHandlers } from './handlers';
 
 export class Bot extends Client {
   public constructor(token: string, options: ClientOptions) {
@@ -26,21 +24,10 @@ export class Bot extends Client {
     this.on('interactionCreate', (interaction) => {
       if (interaction.isCommand()) {
         const { commandName } = interaction;
-        const commandHandler = commandHandlers.get(commandName);
-
-        if (commandHandler) {
-          commandHandler.handle(interaction);
-        }
+        commandHandlers.get(commandName)?.handle(interaction);
       } else if (interaction.isButton()) {
         const [operation, value] = interaction.customId.split('=');
-        console.log(operation, interaction.customId);
-
-        if (operation === 'setLocale') {
-          const locale: TranslatorLangs = value as TranslatorLangs;
-
-          new UserService().setUserLocale(interaction.user, locale);
-        }
-        interaction.reply(`Ok, so it will be ${interaction.customId}`);
+        commandButtonHandlers.get(operation)?.handle(interaction, value);
       }
     });
   }

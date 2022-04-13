@@ -23,6 +23,9 @@ module.exports = {
       },
       rules: {
         '@typescript-eslint/no-misused-new': 'off',
+        'max-len': ['error', {
+          code: 140,
+        }],
       },
     },
   ],
