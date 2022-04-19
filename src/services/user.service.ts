@@ -11,10 +11,8 @@ export class UserService {
     let discordUser: DiscordUser;
 
     try {
-      discordUser = await this.discordUserRepository.findOneOrFail({
-        where: {
-          discordId: user.id,
-        },
+      discordUser = await this.discordUserRepository.findOneByOrFail({
+        discordId: user.id,
       });
       discordUser.lastActive = new Date();
     } catch (e) {
