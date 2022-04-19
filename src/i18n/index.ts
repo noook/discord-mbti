@@ -15,8 +15,12 @@ export const i18nFlags: Record<TranslatorLangs, string> = {
   [TranslatorLangs.FR]: '🇫🇷',
 };
 
+interface Stringifiable {
+  toString(): string;
+}
+
 interface TranslatorParam {
-  [key: string]: string | TranslatorParam;
+  [key: string]: Stringifiable | TranslatorParam;
 }
 
 type Translations = {
