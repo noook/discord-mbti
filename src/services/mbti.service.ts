@@ -26,11 +26,11 @@ export class MbtiService {
   }
 
   public getCurrentTest(user: DiscordUser): Promise<MbtiTest | null> {
-    return this.mbtiTestRepository.findOne({
-      where: {
-        user,
-        completed: false,
+    return this.mbtiTestRepository.findOneBy({
+      user: {
+        id: user.id,
       },
+      completed: false,
     });
   }
 
