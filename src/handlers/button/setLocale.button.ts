@@ -2,20 +2,23 @@ import { ButtonInteraction } from 'discord.js';
 import { MbtiService } from '../../services/mbti.service';
 import { i18n, TranslatorLangs } from '../../i18n';
 import { UserService } from '../../services/user.service';
-import { ButtonHandlerInterface } from './button.interface';
+import { ButtonHandlerInterface, ButtonHandlerValue } from './button.interface';
 import { logger } from '../../logger';
 import { BadInteractionException } from '../../exceptions/BadInteractionException';
 
-export default class LetLocaleButtonHandler implements ButtonHandlerInterface<TranslatorLangs> {
+interface SetLocaleHandlerValue extends ButtonHandlerValue {
+  value: TranslatorLangs;
+}
+export default class SetLocaleButtonHandler implements ButtonHandlerInterface<SetLocaleHandlerValue> {
   public commandName = 'setLocale';
 
   private userService: UserService = new UserService();
 
   private mbtiService: MbtiService = new MbtiService();
 
-  async handle(interaction: ButtonInteraction, value: TranslatorLangs): Promise<void> {
-    const discordUser = await this.userService.setUserLocale(interaction.user, value);
-    await interaction.reply(i18n.t(value, 'common.letstalkx'));
+  async handle(interaction: ButtonInteraction, operation: SetLocaleHandlerValue): Promise<void> {
+    const discordUser = await this.userService.setUserLocale(interaction.user, operation.value);
+    await interaction.reply(i18n.t(discordUser.locale, 'common.letstalkx'));
     try {
       await this.mbtiService.resumeTest(interaction, discordUser);
     } catch (e) {

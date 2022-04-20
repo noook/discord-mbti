@@ -1,4 +1,5 @@
 import { Client, ClientOptions } from 'discord.js';
+import { ButtonHandlerValue } from 'handlers/button/button.interface';
 import { logger } from './logger';
 import { commandButtonHandlers, commandHandlers } from './handlers';
 
@@ -26,8 +27,8 @@ export class Bot extends Client {
         const { commandName } = interaction;
         commandHandlers.get(commandName)?.handle(interaction);
       } else if (interaction.isButton()) {
-        const [operation, value] = interaction.customId.split('=');
-        commandButtonHandlers.get(operation)?.handle(interaction, value);
+        const operation: ButtonHandlerValue = JSON.parse(interaction.customId);
+        commandButtonHandlers.get(operation.id)?.handle(interaction, operation);
       }
     });
   }

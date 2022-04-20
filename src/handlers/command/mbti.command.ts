@@ -21,7 +21,7 @@ export default class MbtiCommandHandler implements CommandHandlerInterface {
       const locales = Object.entries(i18nFlags);
       const actions = new MessageActionRow().addComponents(
         locales.map(([key, flag]) => new MessageButton()
-          .setCustomId(`setLocale=${key}`)
+          .setCustomId(JSON.stringify({ id: 'setLocale', value: key }))
           .setLabel(flag)
           .setStyle('SECONDARY')),
       );

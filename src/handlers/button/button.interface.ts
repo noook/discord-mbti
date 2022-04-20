@@ -1,8 +1,13 @@
 import { ButtonInteraction } from 'discord.js';
 
-export interface ButtonHandlerInterface<T = unknown> {
+export interface ButtonHandlerInterface<T extends ButtonHandlerValue = ButtonHandlerValue> {
   commandName: string;
-  handle(interaction: ButtonInteraction, value: T): void | Promise<void>
+  handle(interaction: ButtonInteraction, operation: T): void | Promise<void>
+}
+
+export interface ButtonHandlerValue {
+  id: string;
+  [key: string]: unknown;
 }
 
 interface CommandButtonHandlerConstructor {
