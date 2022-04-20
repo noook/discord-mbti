@@ -1,7 +1,15 @@
 import {
-  ButtonInteraction, CommandInteraction, Interaction, MessageActionRow, MessageButton, MessageEmbed,
+  ButtonInteraction,
+  CommandInteraction,
+  Interaction,
+  MessageActionRow,
+  MessageButton,
+  MessageEmbed,
 } from 'discord.js';
-import { FruitAction, FRUIT_ACTIONS } from '../types/mbti';
+import { AnswerQuestionHandlerValue } from 'handlers/button/answerQuestion.button';
+import { IsNull } from 'typeorm';
+import { logger } from '../logger';
+import { Dichotomy, FruitAction, FRUIT_ACTIONS } from '../types/mbti';
 import { shuffle } from '../helpers';
 import { AppDataSource } from '../data-source';
 import {
@@ -84,16 +92,33 @@ export class MbtiService {
   public async askQuestion(user: DiscordUser, interaction: CommandInteraction | ButtonInteraction, test: MbtiTest): Promise<void> {
     const nextAnswer = await this.mbtiAnswerRepository.findOne({
       where: {
-        test,
-        value: null,
+        test: {
+          id: test.id,
+        },
+        value: IsNull(),
       },
       order: { step: 'ASC' },
     });
     const reactions = this.prepareReactions();
     const [first, last] = await this.findQuestion(nextAnswer.pairId, user.locale);
+    const commandId = 'answerQuestion';
     const answersButtons = new MessageActionRow().addComponents(
-      new MessageButton().setCustomId(first.value).setLabel(reactions[0]).setStyle('PRIMARY'),
-      new MessageButton().setCustomId(last.value).setLabel(reactions[1]).setStyle('PRIMARY'),
+      new MessageButton()
+        .setCustomId(JSON.stringify({
+          id: commandId,
+          value: first.value,
+          step: test.step,
+        }))
+        .setLabel(reactions[0])
+        .setStyle('PRIMARY'),
+      new MessageButton()
+        .setCustomId(JSON.stringify({
+          id: commandId,
+          value: last.value,
+          step: test.step,
+        }))
+        .setLabel(reactions[1])
+        .setStyle('PRIMARY'),
     );
 
     const msg = new MessageEmbed()
@@ -106,9 +131,59 @@ export class MbtiService {
       ])
       .setColor('BLUE');
 
-    return interaction.reply({
+    interaction.reply({
       embeds: [msg],
       components: [answersButtons],
     });
+
+    const dm = await interaction.user.createDM();
+    const collector = dm.createMessageComponentCollector({
+      max: 1,
+      filter: (i) => {
+        const op: AnswerQuestionHandlerValue = JSON.parse(i.customId);
+        return op.id === commandId && op.step === test.step;
+      },
+    });
+    collector.on('end', (event) => {
+      const i = event.first();
+      interaction.editReply({ embeds: i.message.embeds, components: [] });
+    });
+  }
+
+  private completeTest(interaction: ButtonInteraction, test: MbtiTest) {
+    test.completed = true;
+    test.completedAt = new Date();
+    throw new Error('Todo: implement completeTest()');
+  }
+
+  public async answerQuestion(discordUser: DiscordUser, interaction: ButtonInteraction, step: number, value: Dichotomy) {
+    const test = await this.getCurrentTest(discordUser);
+    if (test === null) {
+      logger.error(`Test not found for user ${discordUser.tag}`);
+      return interaction.reply('Sorry, an error occurred');
+    }
+
+    if (test.step !== step) {
+      logger.error(`Attempt to answer wrong question (current: ${test.step}, received: ${step})`);
+      return interaction.reply('Please reply to latest message');
+    }
+
+    const answer = await this.mbtiAnswerRepository.findOneBy({
+      step,
+      test,
+    });
+
+    answer.value = value;
+    if (test.step === MbtiService.TestLength) {
+      return this.completeTest(interaction, test);
+    }
+
+    test.step += 1;
+    await Promise.all([
+      this.mbtiTestRepository.save(test),
+      this.mbtiAnswerRepository.save(answer),
+    ]);
+
+    return this.askQuestion(discordUser, interaction, test);
   }
 }

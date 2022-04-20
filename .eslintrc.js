@@ -26,6 +26,7 @@ module.exports = {
         'max-len': ['error', {
           code: 140,
         }],
+        'no-param-reassign': ['error', { props: false }],
       },
     },
     {
