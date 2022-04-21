@@ -25,29 +25,29 @@ export class MbtiTest {
   @Column({ nullable: true, type: 'char', length: 4 })
     result?: string;
 
-  @Column({ default: 0 })
-    e: number;
+  @Column({ name: 'E', default: 0 })
+    E: number;
 
-  @Column({ default: 0 })
-    i: number;
+  @Column({ name: 'I', default: 0 })
+    I: number;
 
-  @Column({ default: 0 })
-    n: number;
+  @Column({ name: 'N', default: 0 })
+    N: number;
 
-  @Column({ default: 0 })
-    s: number;
+  @Column({ name: 'S', default: 0 })
+    S: number;
 
-  @Column({ default: 0 })
-    t: number;
+  @Column({ name: 'T', default: 0 })
+    T: number;
 
-  @Column({ default: 0 })
-    f: number;
+  @Column({ name: 'F', default: 0 })
+    F: number;
 
-  @Column({ default: 0 })
-    j: number;
+  @Column({ name: 'J', default: 0 })
+    J: number;
 
-  @Column({ default: 0 })
-    p: number;
+  @Column({ name: 'P', default: 0 })
+    P: number;
 
   @Column({ nullable: true })
     completedAt?: Date;

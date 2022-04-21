@@ -9,7 +9,9 @@ import {
 import { AnswerQuestionHandlerValue } from 'handlers/button/answerQuestion.button';
 import { IsNull } from 'typeorm';
 import { logger } from '../logger';
-import { Dichotomy, FruitAction, FRUIT_ACTIONS } from '../types/mbti';
+import {
+  Dichotomy, DichotomyRowCount, DICHTOTOMY_COUPLES, FruitAction, FRUIT_ACTIONS,
+} from '../types/mbti';
 import { shuffle } from '../helpers';
 import { AppDataSource } from '../data-source';
 import {
@@ -42,11 +44,16 @@ export class MbtiService {
   }
 
   public getCurrentTest(user: DiscordUser): Promise<MbtiTest | null> {
-    return this.mbtiTestRepository.findOneBy({
-      user: {
-        id: user.id,
+    return this.mbtiTestRepository.findOne({
+      where: {
+        user: {
+          id: user.id,
+        },
+        completed: false,
       },
-      completed: false,
+      relations: {
+        user: true,
+      },
     });
   }
 
@@ -144,16 +151,11 @@ export class MbtiService {
         return op.id === commandId && op.step === test.step;
       },
     });
+
     collector.on('end', (event) => {
       const i = event.first();
       interaction.editReply({ embeds: i.message.embeds, components: [] });
     });
-  }
-
-  private completeTest(interaction: ButtonInteraction, test: MbtiTest) {
-    test.completed = true;
-    test.completedAt = new Date();
-    throw new Error('Todo: implement completeTest()');
   }
 
   public async answerQuestion(discordUser: DiscordUser, interaction: ButtonInteraction, step: number, value: Dichotomy) {
@@ -170,20 +172,53 @@ export class MbtiService {
 
     const answer = await this.mbtiAnswerRepository.findOneBy({
       step,
-      test,
+      test: {
+        id: test.id,
+      },
     });
 
     answer.value = value;
+    await this.mbtiAnswerRepository.save(answer);
+
     if (test.step === MbtiService.TestLength) {
       return this.completeTest(interaction, test);
     }
 
     test.step += 1;
-    await Promise.all([
-      this.mbtiTestRepository.save(test),
-      this.mbtiAnswerRepository.save(answer),
-    ]);
+    await this.mbtiTestRepository.save(test);
 
     return this.askQuestion(discordUser, interaction, test);
+  }
+
+  private async completeTest(interaction: ButtonInteraction, test: MbtiTest) {
+    test.completed = true;
+    test.completedAt = new Date();
+    const results = await this.getResults(test);
+    results.forEach((entry) => {
+      test[entry.value] = entry.count;
+    });
+    test.result = this.calculateResults(test);
+    await this.mbtiTestRepository.save(test);
+
+    return interaction.reply([
+      i18n.t(test.user.locale, 'mbti.typeResult', { type: test.result }),
+      i18n.t(test.user.locale, 'mbti.akaBase', { alias: i18n.t(test.user.locale, `mbti.typeAka.${test.result}`) }),
+      i18n.t(test.user.locale, `mbti.summaries.${test.result}`),
+      i18n.t(test.user.locale, 'mbti.detailLink', { type: test.result }),
+    ].join('\n\n'));
+  }
+
+  private getResults(test: MbtiTest): Promise<DichotomyRowCount[]> {
+    return this.mbtiAnswerRepository
+      .createQueryBuilder('a')
+      .select('a.value', 'value')
+      .addSelect('COUNT(*)::int', 'count')
+      .andWhere('a.test = :testId', { testId: test.id })
+      .groupBy('a.value')
+      .getRawMany();
+  }
+
+  private calculateResults(test: MbtiTest): string {
+    return DICHTOTOMY_COUPLES.reduce((result, pair) => result + pair.sort((a, b) => test[a] - test[b]).pop(), '');
   }
 }
