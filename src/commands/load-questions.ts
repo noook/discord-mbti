@@ -3,7 +3,7 @@ import { Dichotomy } from 'types/mbti';
 import { DeepPartial } from 'typeorm';
 import { MbtiQuestion } from '../entity/MbtiQuestion';
 import { AppDataSource } from '../data-source';
-import { questions } from '../../resources/questions.json';
+import { questions } from '../resources/questions.json';
 
 interface Question {
   label: {

@@ -4,7 +4,9 @@
    "main": "index.js",
    "license": "MIT",
    "scripts": {
+      "build": "tsc",
       "dev": "nodemon",
+      "start": "node dist/src",
       "migration:generate": "typeorm-ts-node-commonjs migration:generate -p -d src/data-source.ts",
       "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
       "typeorm": "typeorm-ts-node-commonjs"
