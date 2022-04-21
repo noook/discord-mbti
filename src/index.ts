@@ -1,8 +1,9 @@
+import { AutoPoster } from 'topgg-autoposter';
 import 'dotenv/config';
 import { Intents } from 'discord.js';
 import { Bot } from './bot';
 import { AppDataSource } from './data-source';
-import { logger } from './logger';
+import { logger, currentRunInfoLogger } from './logger';
 
 // eslint-disable-next-line no-console
 console.clear();
@@ -21,3 +22,9 @@ const bot = new Bot(process.env.DISCORD_TOKEN, {
 });
 
 bot.start();
+
+const ap = AutoPoster(process.env.TOPGG_TOKEN, bot);
+ap.on('posted', (e) => {
+  currentRunInfoLogger.info(`Server count: ${e.serverCount}`);
+  currentRunInfoLogger.info('Server count: AH?.');
+});

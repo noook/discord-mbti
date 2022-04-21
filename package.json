@@ -31,6 +31,7 @@
       "dotenv": "^16.0.0",
       "pg": "^8.4.0",
       "reflect-metadata": "^0.1.13",
+      "topgg-autoposter": "^2.0.1",
       "typeorm": "0.3.5",
       "winston": "^3.7.2"
    }

@@ -9,7 +9,7 @@ declare namespace NodeJS {
     DB_NAME: string;
     DB_USER: string;
     DB_PASSWORD: string;
-    DISCORDBOTS_TOKEN: string;
+    TOPGG_TOKEN: string;
     BOT_CLIENT_ID: string;
   }
 }
