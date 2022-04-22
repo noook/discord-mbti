@@ -1,9 +1,10 @@
 import { AutoPoster } from 'topgg-autoposter';
+import { writeFile } from 'node:fs';
 import 'dotenv/config';
 import { Intents } from 'discord.js';
 import { Bot } from './bot';
 import { AppDataSource } from './data-source';
-import { logger, currentRunInfoLogger } from './logger';
+import { logger } from './logger';
 
 // eslint-disable-next-line no-console
 console.clear();
@@ -24,7 +25,9 @@ const bot = new Bot(process.env.DISCORD_TOKEN, {
 bot.start();
 
 const ap = AutoPoster(process.env.TOPGG_TOKEN, bot);
+
 ap.on('posted', (e) => {
-  currentRunInfoLogger.info(`Server count: ${e.serverCount}`);
-  currentRunInfoLogger.info('Server count: AH?.');
+  writeFile('info.txt', `Server count: ${e.serverCount}`, {
+    encoding: 'utf8',
+  }, (err) => logger.error(err.message));
 });

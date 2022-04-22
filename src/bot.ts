@@ -18,6 +18,7 @@ export class Bot extends Client {
   private greet() {
     this.on('ready', (client) => {
       logger.info(`Connected as ${client.user.tag}`);
+      client.user.setActivity('/mbti - Determining your MBTI type');
     });
   }
 

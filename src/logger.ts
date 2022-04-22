@@ -10,16 +10,3 @@ export const logger = winston.createLogger({
     }),
   ],
 });
-
-export const currentRunInfoLogger = winston.createLogger({
-  transports: [
-    new winston.transports.File({
-      filename: 'info.txt',
-      level: 'info',
-      options: {
-        flags: 'w',
-      },
-      format: winston.format.simple(),
-    }),
-  ],
-});
