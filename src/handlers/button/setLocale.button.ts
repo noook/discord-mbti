@@ -18,7 +18,8 @@ export default class SetLocaleButtonHandler implements ButtonHandlerInterface<Se
 
   async handle(interaction: ButtonInteraction, operation: SetLocaleHandlerValue): Promise<void> {
     const discordUser = await this.userService.setUserLocale(interaction.user, operation.value);
-    await interaction.reply(i18n.t(discordUser.locale, 'common.letstalkx'));
+    const dm = await interaction.user.createDM();
+    await dm.send(i18n.t(discordUser.locale, 'common.letstalkx'));
     try {
       await this.mbtiService.resumeTest(interaction, discordUser);
     } catch (e) {

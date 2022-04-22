@@ -138,8 +138,7 @@ export class MbtiService {
       ])
       .setColor('BLUE');
 
-    const interactionReply = interaction.replied ? interaction.followUp : interaction.reply;
-    interactionReply({
+    interaction.reply({
       embeds: [msg],
       components: [answersButtons],
     });
