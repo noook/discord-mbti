@@ -29,5 +29,5 @@ const ap = AutoPoster(process.env.TOPGG_TOKEN, bot);
 ap.on('posted', (e) => {
   writeFile('info.txt', `Server count: ${e.serverCount}`, {
     encoding: 'utf8',
-  }, (err) => logger.error(err.message));
+  }, (err) => err && logger.error(err.message));
 });
