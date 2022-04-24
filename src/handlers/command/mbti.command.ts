@@ -26,7 +26,13 @@ export default class MbtiCommandHandler implements CommandHandlerInterface {
           .setStyle('SECONDARY')),
       );
 
-      return interaction.reply({
+      interaction.reply({
+        content: 'Just sent you a DM, check them !',
+        ephemeral: true,
+      });
+
+      const dm = await interaction.user.createDM();
+      dm.send({
         content: "We haven't met yet ! Which language would like to speak ?",
         components: [actions],
       });

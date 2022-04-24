@@ -2,9 +2,11 @@ import {
   ButtonInteraction,
   CommandInteraction,
   Interaction,
+  InteractionReplyOptions,
   MessageActionRow,
   MessageButton,
   MessageEmbed,
+  MessagePayload,
 } from 'discord.js';
 import { AnswerQuestionHandlerValue } from 'handlers/button/answerQuestion.button';
 import { IsNull } from 'typeorm';
@@ -138,10 +140,10 @@ export class MbtiService {
       ])
       .setColor('BLUE');
 
-    interaction.reply({
+    const msgPayload: MessagePayload | InteractionReplyOptions = {
       embeds: [msg],
       components: [answersButtons],
-    });
+    };
 
     const dm = await interaction.user.createDM();
     const collector = dm.createMessageComponentCollector({
@@ -151,11 +153,23 @@ export class MbtiService {
         return op.id === commandId && op.step === test.step;
       },
     });
+    const channel = await interaction.client.channels.fetch(interaction.channelId, { cache: true });
 
-    collector.on('end', (event) => {
-      const i = event.first();
-      interaction.editReply({ embeds: i.message.embeds, components: [] });
-    });
+    if (channel.type !== 'DM') {
+      await interaction.reply({ content: i18n.t(user.locale, 'common.goDM'), ephemeral: true });
+      const sentMsg = await dm.send(msgPayload);
+
+      collector.on('end', (event) => {
+        const i = event.first();
+        sentMsg.edit({ embeds: i.message.embeds, components: [] });
+      });
+    } else {
+      await interaction.reply(msgPayload);
+      collector.on('end', (event) => {
+        const i = event.first();
+        interaction.editReply({ embeds: i.message.embeds, components: [] });
+      });
+    }
   }
 
   public async answerQuestion(discordUser: DiscordUser, interaction: ButtonInteraction, step: number, value: Dichotomy) {
@@ -167,7 +181,7 @@ export class MbtiService {
 
     if (test.step !== step) {
       logger.error(`Attempt to answer wrong question (current: ${test.step}, received: ${step})`);
-      return interaction.reply('Please reply to latest message');
+      return interaction.reply(i18n.t(discordUser.locale, 'common.replyToLatest'));
     }
 
     const answer = await this.mbtiAnswerRepository.findOneBy({
@@ -179,7 +193,6 @@ export class MbtiService {
 
     answer.value = value;
     await this.mbtiAnswerRepository.save(answer);
-
     if (test.step === MbtiService.TestLength) {
       return this.completeTest(interaction, test);
     }
