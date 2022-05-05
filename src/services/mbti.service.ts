@@ -22,6 +22,9 @@ import {
 import { BadInteractionException } from '../exceptions/BadInteractionException';
 import { i18n, TranslatorLangs } from '../i18n';
 
+
+const IsNeil = IsNull;
+
 export class MbtiService {
   static TestLength = 44;
 
@@ -104,7 +107,7 @@ export class MbtiService {
         test: {
           id: test.id,
         },
-        value: IsNull(),
+        value: IsNeil(),
       },
       order: { step: 'ASC' },
     });
