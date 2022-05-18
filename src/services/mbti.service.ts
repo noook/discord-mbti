@@ -12,7 +12,7 @@ import { AnswerQuestionHandlerValue } from 'handlers/button/answerQuestion.butto
 import { IsNull } from 'typeorm';
 import { logger } from '../logger';
 import {
-  Dichotomy, DichotomyRowCount, DICHTOTOMY_COUPLES, FruitAction, FRUIT_ACTIONS,
+  Dichotomy, DichotomyRowCount, DICHOTOMY_COUPLES, FruitAction, FRUIT_ACTIONS,
 } from '../types/mbti';
 import { shuffle } from '../helpers';
 import { AppDataSource } from '../data-source';
@@ -232,6 +232,6 @@ export class MbtiService {
   }
 
   private calculateResults(test: MbtiTest): string {
-    return DICHTOTOMY_COUPLES.reduce((result, pair) => result + pair.sort((a, b) => test[a] - test[b]).pop(), '');
+    return DICHOTOMY_COUPLES.reduce((result, pair) => result + [...pair.sort((a, b) => test[a] - test[b])].pop(), '');
   }
 }

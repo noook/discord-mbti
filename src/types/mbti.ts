@@ -9,7 +9,7 @@ export interface DichotomyRowCount {
   count: number;
 }
 
-export const DICHTOTOMY_COUPLES: [
+export const DICHOTOMY_COUPLES: [
   DichotomyCouple,
   DichotomyCouple,
   DichotomyCouple,
