@@ -232,6 +232,6 @@ export class MbtiService {
   }
 
   private calculateResults(test: MbtiTest): string {
-    return DICHOTOMY_COUPLES.reduce((result, pair) => result + [...pair.sort((a, b) => test[a] - test[b])].pop(), '');
+    return [...DICHOTOMY_COUPLES].reduce((result, pair) => result + pair.sort((a, b) => test[a] - test[b]).pop(), '');
   }
 }
